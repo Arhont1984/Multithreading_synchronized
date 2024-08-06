@@ -1,36 +1,25 @@
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 public static void main(String[] args) {
     //создаём HashMap для последующего заполнения
     final Map<Integer, Integer> sizeToFreq = new HashMap<>();
-    //Создаём пулл потоков заданной велечины
-    int numberOfRoutes = 1000;
-    ExecutorService executor = Executors.newFixedThreadPool(numberOfRoutes);
-
-    //Логикака задачи
-    for (int i = 0; i < numberOfRoutes; i++) {
-
-        executor.submit(() -> {
+    //Создаём 1000 потоков.
+    for (int i = 0; i <= 1000; i++) {
+        new Thread(() -> {
+            //Логика программы
+            String route = RobotRouteGenerator.generateRoute("RLRFR", 100);
+            int countR = countRightTurns(route);
             synchronized (sizeToFreq) {
-                String route = RobotRouteGenerator.generateRoute("RLRFR", 100);
-                int countR = countRightTurns(route);
-                //Создаём синхронизированный поток для добавления элементов в sizeToFreq
-                new Thread(() -> {
-                    synchronized (sizeToFreq) {
-                        if (!sizeToFreq.containsKey(countR)) {
-                            sizeToFreq.put(countR, 1);
-                        } else {
-                            sizeToFreq.put(countR, sizeToFreq.get(countR) + 1);
-                        }
-                    }
-                }).start();
+                if (!sizeToFreq.containsKey(countR)) {
+                    sizeToFreq.put(countR, 1);
+                } else {
+                    sizeToFreq.put(countR, sizeToFreq.get(countR) + 1);
+                }
             }
-        });
+        }).start();
     }
-    executor.shutdown();
 
 //Поиск максимальных значений и вывод в консоль
     int maxFreq = 0;
@@ -53,7 +42,6 @@ public static void main(String[] args) {
     }
 }
 
-
 private static int countRightTurns(String route) {
     int count = 0;
     for (char command : route.toCharArray()) {
@@ -64,6 +52,8 @@ private static int countRightTurns(String route) {
 
     return count;
 }
+
+
 
 
 
